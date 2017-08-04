@@ -54,8 +54,8 @@ namespace consensus {
     }
 
     void Validator::on_commit(CommitMessage const& commit) {
-      std::cout << "Validator::on_commit() [承認]\n";
       committed.store(true);
+      print_accept();
       // TODO: Permutate peers.
     }
 
@@ -79,7 +79,7 @@ namespace consensus {
           error_recover(vote);
         } else {
           std::cout << "\x1b[41mValidator::error_recover::on_reject()\x1b[49m\n";
-          on_reject();
+          print_reject();
         }
       })
           .detach();

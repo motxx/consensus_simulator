@@ -215,7 +215,7 @@ void simulate_validator_max_faulty(size_t const PeerCount) {
       context.sumeragi =
         std::make_shared<Sumeragi>(i, std::make_shared<Leader>(context.conn));
     } else if (i < 2 * f) {
-      if (++curr_faulty < f) {
+      if (++curr_faulty < f) { // 2f+1の署名が必要。ピアの数=30, f=30/3=10, 2f+1=21だと、9台までしかピアを落とせない。
         context.sumeragi = std::make_shared<Sumeragi>(
           i, std::make_shared<ValidatorDeath>(context.conn));
       } else {

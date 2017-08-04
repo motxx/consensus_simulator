@@ -47,12 +47,21 @@ namespace consensus {
       return "Member";
     }
 
-    void Member::on_reject() {
+    void Member::print_accept() {
+      if (auto sumeragi = *sumeragi_) {
+        std::cout << "\x1b[32m" << state_string()
+                  << " Peer order: " << (*sumeragi).order() << " [承認]\x1b[39m\n";
+      } else {
+        std::runtime_error("[Member::print_accept] Invalid read sumeragi");
+      }
+    }
+
+    void Member::print_reject() {
       if (auto sumeragi = *sumeragi_) {
         std::cout << "\x1b[41m" << state_string()
                   << " Peer order: " << (*sumeragi).order() << " [否認]\x1b[49m\n";
       } else {
-        std::runtime_error("[Member] Invalid read sumeragi");
+        std::runtime_error("[Member::print_reject] Invalid read sumeragi");
       }
     }
 

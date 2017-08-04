@@ -51,8 +51,8 @@ namespace consensus {
     }
 
     void ProxyTail::on_commit(CommitMessage const& commit) {
-      std::cout << "[ProxyTails] [承認]\n";
       committed.store(true);
+      print_accept();
       // TODO: Permutate peers
     }
 
@@ -116,7 +116,7 @@ namespace consensus {
             Validator::send_to_proxy_tail(vote);
             Validator::error_recover(vote);
           } else {
-            on_reject();
+            print_reject();
           }
         }
       }

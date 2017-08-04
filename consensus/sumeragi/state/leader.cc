@@ -47,7 +47,7 @@ namespace consensus {
 
     void Leader::on_commit(CommitMessage const& commit) {
       committed.store(true);
-      std::cout << "Leader::on_commit() [承認]\n";
+      print_accept();
       // TODO: Permutate peers
     }
   }  // namespace sumeragi
