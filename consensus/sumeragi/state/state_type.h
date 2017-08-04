@@ -25,6 +25,13 @@ namespace consensus {
       ProxyTail,
       Member,
     };
+
+    inline const char* state_string(StateType state) {
+      if (state == StateType::Leader) { return "Leader"; }
+      if (state == StateType::Validator) { return "Validator"; }
+      if (state == StateType::ProxyTail) { return "ProxyTail"; }
+      return "Member";
+    }
   }  // namespace sumeragi
 }    // namespace consensus
 

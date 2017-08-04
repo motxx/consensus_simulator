@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef REPOSITORY_STORAGE_H
-#define REPOSITORY_STORAGE_H
+#ifndef REPOSITORY_STORAGE_INFRA_SQLITE_H
+#define REPOSITORY_STORAGE_INFRA_SQLITE_H
 
-//#include <leveldb/db.h>
+#include "repository/storage.h"
 #include <vector>
-#include <memory>
 #include <nonstd/optional.hpp>
-#include "common/types.h"
-#include "model/peer.h"
 
 namespace repository {
-  class Storage {
-   public:
-    Storage(std::string const& source_dir);
-    virtual ~Storage() {}
+  class StorageWithSqlite : public repository::Storage {
+  public:
+    StorageWithSqlite(std::string const& source_dir);
+    virtual ~StorageWithSqlite() {}
 
     // Read
     virtual std::vector<model::Peer> get_all_peers();
@@ -39,10 +36,7 @@ namespace repository {
 
     // Delete
     virtual void delete_peer();
-
-  private:
-    std::string source_dir;
   };
-}  // namespace repository
+}
 
-#endif  // REPOSITORY_STORAGE_H
+#endif  // REPOSITORY_STORAGE_INFRA_SQLITE_H

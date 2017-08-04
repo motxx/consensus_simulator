@@ -25,7 +25,8 @@ namespace consensus {
   namespace sumeragi {
     class Sumeragi;
     namespace infra {
-      struct Server {
+      class Server {
+      public:
         Server(){}
         Server(consensus::sumeragi::Sumeragi* sumeragi)
           : sumeragi_(sumeragi) {}

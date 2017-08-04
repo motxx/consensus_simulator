@@ -26,6 +26,7 @@ namespace consensus {
       ValidatorDeath(std::shared_ptr<infra::Client> client)
         : Validator(client) {}
       virtual ~ValidatorDeath() {}
+      HasError behaviour() const override { return HasError::Error; }
       virtual void on_vote(VoteMessage const& vote);
       virtual void on_commit(CommitMessage const& commit);
     };

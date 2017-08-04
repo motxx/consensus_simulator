@@ -32,15 +32,16 @@ namespace consensus {
     struct Member {
       Member(std::shared_ptr<infra::Client> client)
         : client_(client) {}
+      enum class HasError { Normal, Error };
       virtual ~Member() {}
       virtual StateType state() const { return StateType::Member; }
+      virtual HasError behaviour() const { return HasError::Normal; } // 正常系か異常系か
       virtual void on_vote(VoteMessage const& vote);
       virtual void on_commit(CommitMessage const& commit);
 
       void print_accept();
       void print_reject();
 
-      std::string state_string();
       void set_sumeragi(Sumeragi* sumeragi) { sumeragi_ = sumeragi; }
       VoteMessage add_signature(VoteMessage const& vote);
 

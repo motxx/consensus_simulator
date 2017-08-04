@@ -17,31 +17,31 @@
 #ifndef CONESENSUS_SUMERAGI_STATE_PROXYTAIl_H
 #define CONESENSUS_SUMERAGI_STATE_PROXYTAIl_H
 
-#include "validator.h"
-#include "model/signature.h"
 #include <chrono>
+#include "model/signature.h"
+#include "validator.h"
 
 namespace consensus {
   namespace sumeragi {
     struct ProxyTail : public Validator {
-      ProxyTail(std::shared_ptr<infra::Client> client)
-        : Validator(client) {}
+      ProxyTail(std::shared_ptr<infra::Client> client) : Validator(client) {}
       virtual ~ProxyTail() {}
       StateType state() const override { return StateType::ProxyTail; }
       virtual void on_vote(VoteMessage const& vote);
       virtual void on_commit(CommitMessage const& commit);
 
-    private:
+     private:
       CommitMessage make_commit(VoteMessage const& vote);
       void send_commit(CommitMessage const& commit);
       void commit_or_retry(VoteMessage const& vote);
       void wait_for_signatures(VoteMessage const& vote);
+      bool count_valid_signatures(
+          std::vector<model::Signature> const& signatures);
 
       std::vector<model::Signature> signature_pool_;
-      std::chrono::milliseconds elasped_waiting_votes {0};
-      //const std::chrono::milliseconds SignatureTimeOut {2000};
+      std::chrono::milliseconds elasped_waiting_votes{0};
     };
   }  // namespace sumeragi
-}    // namespace consensus
+}  // namespace consensus
 
-#endif // CONESENSUS_SUMERAGI_STATE_PROXYTAIl_H
+#endif  // CONESENSUS_SUMERAGI_STATE_PROXYTAIl_H

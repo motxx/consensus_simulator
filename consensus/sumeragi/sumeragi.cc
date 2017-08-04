@@ -30,15 +30,11 @@
 namespace consensus {
   namespace sumeragi {
 
-    Sumeragi::Sumeragi(size_t const order, std::shared_ptr<Member> state)
-        : order_(order), state_(state), server_(std::make_shared<infra::Server>(this)) {
-      const auto f = NETWORK.peers_size() / 3;
-      StateType st;
-      if (order == 0)          { st = StateType::Leader; }
-      else if (order < 2 * f)  { st = StateType::Validator; }
-      else if (order == 2 * f) { st = StateType::ProxyTail; }
-      else                     { st = StateType::Member; }
-      change_state(st, state);
+    Sumeragi::Sumeragi(size_t const order, StateType state_type, std::shared_ptr<Member> state)
+        : order_(order),
+          state_(state),
+          server_(std::make_shared<infra::Server>(this)) {
+      change_state(state_type, state);
       state_->set_sumeragi(this);
     }
 
@@ -70,7 +66,8 @@ namespace consensus {
       return nonstd::nullopt;
     }
 
-    void Sumeragi::change_state(StateType state_type, std::shared_ptr<Member> state) {
+    void Sumeragi::change_state(StateType state_type,
+                                std::shared_ptr<Member> state) {
       state_type_ = state_type;
       state_ = state;
     }
@@ -90,7 +87,7 @@ namespace consensus {
 
     // network simulator / grpc server
     void Sumeragi::run_server(std::string const& ip, size_t const port) {
-      Network<infra::Server>::get_instance().register_server(ip, port, server_);
+      NETWORK.register_server(ip, port, server_);
     }
 
   }  // namespace sumeragi

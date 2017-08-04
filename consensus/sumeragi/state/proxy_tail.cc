@@ -77,7 +77,7 @@ namespace consensus {
     }
 
     void ProxyTail::send_commit(CommitMessage const& commit) {
-      auto peers = Network<infra::Server>::get_instance().get_all_peers();
+      auto peers = NETWORK.get_all_peers();
       for (size_t i = 0; i < peers.size(); ++i) {
         // TODO: 自分のピアかの判定をし、そうであればスキップする
         client_->send_commit(peers[i], commit);
@@ -86,13 +86,15 @@ namespace consensus {
       // が終了してからこの操作を行う。
     }
 
-    bool count_valid_signatures(
+    bool ProxyTail::count_valid_signatures(
         std::vector<model::Signature> const& signatures) {
       // TODO: Mock
-      auto f =
-          Network<infra::Server>::get_instance().get_all_peers().size() / 3;
-      return signatures.size() >=
-             2 * f + 1;  // Note: skips validating signatures.
+      const auto peer_size = NETWORK.peers_size();
+      if (auto sumeragi = sumeragi_) {
+        return signatures.size() >= (*sumeragi)->required_num_sigs();  // Note: skips validating signatures.
+      } else {
+        std::runtime_error("ProxyTail::count_valid_signatures failed to read sumeragi");
+      }
     }
 
     void ProxyTail::commit_or_retry(VoteMessage const& vote) {

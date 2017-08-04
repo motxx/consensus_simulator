@@ -14,23 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef CONSENSUS_SUMERAGI_INFRA_CLIENT_H
-#define CONSENSUS_SUMERAGI_INFRA_CLIENT_H
+#include "storage_with_sqlite.h"
+#include <SQLiteCpp/SQLiteCpp.h>
 
-#include "consensus/sumeragi/messages.h"
-#include "model/peer.h"
+namespace repository {
+  StorageWithSqlite::StorageWithSqlite(std::string const &source_dir)
+    : Storage(source_dir)
+  {
+  }
 
-namespace consensus {
-  namespace sumeragi {
-    namespace infra {
-      class Client {
-      public:
-        virtual ~Client() {}
-        virtual bool send_vote(model::Peer const& peer, VoteMessage const& vote);
-        virtual bool send_commit(model::Peer const& peer, CommitMessage const& commit);
-      };
-    }  // namespace infra
-  }  // namespace sumeragi
-}  // namespace consensus
+  // Read
+  std::vector<model::Peer> get_all_peers() {
+    return std::vector<model::Peer>();
+  }
 
-#endif  // CONSENSUS_SUMERAGI_INFRA_CLIENT_H
+  model::Peer get_peer(common::types::pubkey_t const& pubkey) {
+    return model::Peer();
+  }
+
+  // Write
+  void save_peer(model::Peer const& peer) {
+
+  }
+
+  // Delete
+  void delete_peer() {
+
+  }
+}

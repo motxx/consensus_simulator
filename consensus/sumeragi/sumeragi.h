@@ -43,14 +43,21 @@ namespace consensus {
 
     class Sumeragi : public SumeragiGate {
      public:
-      Sumeragi(size_t const order, std::shared_ptr<Member> state);
+      Sumeragi(size_t const order, StateType state_type, std::shared_ptr<Member> state);
 
-      // state machine
+      // 各ステートは、個別の実装が責務となる。
+      // state machineなので、virtual methodsを入れ替えられる。
       nonstd::optional<Leader*> leader();
       nonstd::optional<Validator*> validator();
       nonstd::optional<ProxyTail*> proxy_tail();
       nonstd::optional<Member*> member();
       void change_state(StateType state_type, std::shared_ptr<Member> state);
+
+      size_t order() const { return order_; }
+      StateType state_type() const { return state_type_; }
+
+      size_t max_faulty() const { return NETWORK.peers_size() / 3; }
+      size_t required_num_sigs() const { return NETWORK.peers_size() - max_faulty(); }
 
       // SumeragiGate
       void on_proposal(model::Proposal const& proposal) override;
@@ -58,9 +65,8 @@ namespace consensus {
       // network simulator / grpc server
       void run_server(std::string const& ip, size_t const port);
 
-      // TODO: better way.
+      // TODO: 別のピアとの接続は、ステートマシン自身のもつ仕事ではない。せめてmix-inにしておく。
       std::shared_ptr<infra::Client> client() { return client_; }
-      // std::shared_ptr<PeerService> peer_service() { return peer_service_; }
 
       bool has_next_proxy() {
         return next_proxy_tail_ + 1 < NETWORK.peers_size();
@@ -68,9 +74,9 @@ namespace consensus {
 
       // TODO: Remove return type optional
       nonstd::optional<size_t> next_proxy() {
-        const auto f = NETWORK.peers_size() / 3;
         if (next_proxy_tail_ == 0) {
-          next_proxy_tail_ = 2 * f < order_ ? order_ : 2 * f;
+          const int init_index = static_cast<int>(required_num_sigs()) - 1;
+          next_proxy_tail_ = init_index < order_ ? order_ : static_cast<size_t>(init_index);
           return nonstd::make_optional(next_proxy_tail_);
         }
         return ++next_proxy_tail_ < NETWORK.peers_size()
@@ -78,14 +84,11 @@ namespace consensus {
                    : nonstd::nullopt;
       }
 
-      size_t order() const { return order_; }
-
      private:
       StateType state_type_;
       size_t order_ = 0;
       size_t next_proxy_tail_ = 0;  // 0(= 2f), 2f+1, ...
       std::shared_ptr<Member> state_;
-      // std::shared_ptr<PeerService> peer_service_;
       std::shared_ptr<infra::Client> client_;
       std::shared_ptr<infra::Server> server_;
     };

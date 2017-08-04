@@ -17,30 +17,35 @@
 #ifndef CONSENSUS_SUMERAGI_PEER_SERVICE_H
 #define CONSENSUS_SUMERAGI_PEER_SERVICE_H
 
-#include "model/peer.h"
-#include "repository/storage.h"
 #include <algorithm>
 #include <nonstd/optional.hpp>
 #include <vector>
+#include "model/peer.h"
+#include "repository/storage.h"
 
 namespace consensus {
   namespace sumeragi {
     class PeerService {
-    public:
-      PeerService(model::Peer const& self, std::shared_ptr<repository::Storage> storage)
-        : self_(self), storage_(storage) {}
+     public:
+      PeerService(model::Peer const& self,
+                  std::shared_ptr<repository::Storage> storage)
+          : self_(self), storage_(storage) {}
+
       model::Peer self() const { return self_; }
+
       model::Peer proxy_tail() const {
         auto size = storage_->get_size_of_peers();
         auto f = size / 3;
-        return storage_->get_peer_from_index(2 * f + 1).value();
+        return storage_->get_peer_from_index(size - f - 1).value();
       }
+
       nonstd::optional<model::Peer> next_peer() const {
         return storage_->get_peer_from_index(self_.index + 1);
       }
+
       std::vector<model::Peer> validators() {
         std::vector<model::Peer> peers;
-        storage_->get_peer_from_index()
+        storage_->get_peer_from_index();
         return peers;
       }
 
@@ -51,12 +56,13 @@ namespace consensus {
         storage_->update_perm(perm);
         */
       }
-    private:
-      std::vector<Peer> peers_:
+
+     private:
       model::Peer self_;
+      std::vector<Peer> peers_;
       std::shared_ptr<repository::Storage> storage_;
     };
-  }
-}
+  }  // namespace sumeragi
+}  // namespace consensus
 
 #endif  // CONSENSUS_SUMERAGI_PEER_SERVICE_H

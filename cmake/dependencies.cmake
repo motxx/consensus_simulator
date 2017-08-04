@@ -91,58 +91,26 @@ set_target_properties(optional PROPERTIES
 
 add_dependencies(optional martinmoene_optional)
 
-
-#[[
-####################
-#      snappy      #
-####################
-EXTERNALPROJECT_ADD(
-  snappy_proj
-  GIT_REPOSITORY https://github.com/google/snappy.git
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}
-  UPDATE_COMMAND ""
-  CONFIGURE_COMMAND ./autogen.sh && ./configure
-  SOURCE_DIR ${snappy_build}
-  BUILD_COMMAND make -j${PROCESSOR_COUNT_VAL}
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND ""
-)
-
-SET(SNAPPY_INCLUDE_DIR ${snappy_build}/include)
-SET(SNAPPY_LIB_DIR ${snappy_build})
-
-ADD_LIBRARY(snappy STATIC IMPORTED)
-SET_PROPERTY(TARGET snappy PROPERTY IMPORTED_LOCATION ${snappy_build}/.libs/${CMAKE_STATIC_LIBRARY_PREFIX}snappy${CMAKE_STATIC_LIBRARY_SUFFIX})
-
-ADD_DEPENDENCIES(snappy snappy_proj)
-
-############################
-#         leveldb          #
-############################
-ExternalProject_Add(google_leveldb
-  GIT_REPOSITORY    "https://github.com/google/leveldb.git"
-  BUILD_IN_SOURCE   1
-  BUILD_COMMAND     $(MAKE) -j1 OPT=-fPIC
-  CONFIGURE_COMMAND "" # remove configure step
-  INSTALL_COMMAND   "" # remove install step
-  TEST_COMMAND      "" # remove test step
-  UPDATE_COMMAND    "" # remove update step
+#############################
+#         SQLiteCpp         #
+#############################
+externalproject_add(srombauts_sqlitecpp
+  GIT_REPOSITORY "https://github.com/SRombauts/SQLiteCpp"
+  GIT_TAG "2.1.0"
+  INSTALL_COMMAND "" # remove install step
+  TEST_COMMAND "" # remove test step
+  UPDATE_COMMAND "" # remove update step
   )
-ExternalProject_Get_Property(google_leveldb source_dir)
-set(leveldb_SOURCE_DIR "${source_dir}")
+externalproject_get_property(srombauts_sqlitecpp source_dir binary_dir)
+set(sqlitecpp_INCLUDE_DIR ${source_dir}/include)
+set(sqlitecpp_LIBRARY ${binary_dir}/lib/libsqlitecpp.a)
 
-add_library(leveldb STATIC IMPORTED)
-file(MAKE_DIRECTORY ${leveldb_SOURCE_DIR}/include)
-file(MAKE_DIRECTORY ${leveldb_SOURCE_DIR}/out-shared)
-file(MAKE_DIRECTORY ${leveldb_SOURCE_DIR}/out-static)
-set_target_properties(leveldb PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES ${leveldb_SOURCE_DIR}/include
-  IMPORTED_LINK_INTERFACE_LIBRARIES "snappy"
-  IMPORTED_LOCATION ${leveldb_SOURCE_DIR}/out-static/libleveldb.a
+add_library(sqlitecpp STATIC IMPORTED)
+file(MAKE_DIRECTORY ${sqlitecpp_INCLUDE_DIR})
+
+set_target_properties(sqlitecpp PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES ${sqlitecpp_INCLUDE_DIR}
+  IMPORTED_LOCATION ${sqlitecpp_LIBRARY}
+  #IMPORTED_LINK_INTERFACE_LIBRARIES "pthread"
   )
-add_dependencies(leveldb google_leveldb)
-
-INCLUDE(ExternalLeveldb)
-INCLUDE_DIRECTORIES(${LEVELDB_INCLUDE_DIR})
-LINK_DIRECTORIES(${LEVELDB_LIB_DIR})
-]]
+add_dependencies(sqlitecpp srombauts_sqlitecpp)

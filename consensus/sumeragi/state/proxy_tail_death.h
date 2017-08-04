@@ -25,6 +25,7 @@ namespace consensus {
       ProxyTailDeath(std::shared_ptr<infra::Client> client)
         : ProxyTail(client) {}
       virtual ~ProxyTailDeath() {}
+      HasError behaviour() const override { return HasError::Error; }
       void on_vote(VoteMessage const& vote) override;
       void on_commit(CommitMessage const& commit) override;
     };

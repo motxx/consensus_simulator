@@ -17,57 +17,50 @@
 #ifndef MAIN_NETWORK_SIMULATOR_H
 #define MAIN_NETWORK_SIMULATOR_H
 
-#include <iostream>
 #include <memory>
 #include <nonstd/optional.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "consensus/sumeragi/sumeragi.h"
-
-// Alternative to peer service
 #include "model/peer.h"
 
-#define NETWORK Network<infra::Server>::get_instance()
+namespace consensus {
+  namespace sumeragi {
+    namespace infra {
+      class Server;
+    }
+  }  // namespace sumeragi
+}  // namespace consensus
 
-template <class Server>
-struct Network {
+#define NETWORK Network::get_instance()
+
+class Network {
+ public:
+  virtual void register_server(
+      std::string const& ip, size_t const port,
+      std::shared_ptr<consensus::sumeragi::infra::Server> const& server);
+  virtual nonstd::optional<consensus::sumeragi::infra::Server*> find(
+      std::string const& ip, size_t const port);
+  virtual std::vector<model::Peer> get_all_peers();
+  virtual void set_peers(std::vector<model::Peer> const& peers);
+
+  size_t peers_size() const { return peers_.size(); }
+
+  void clear() {
+    servers_.clear();
+    peers_.clear();
+  }
+
   static Network& get_instance() {
     static Network instance;
     return instance;
   }
 
-  void register_server(std::string const& ip, size_t const port,
-                       std::shared_ptr<Server> const& server) {
-    const auto address = ip + ":" + std::to_string(port);
-    servers[address] = server;
-  }
-
-  nonstd::optional<Server*> find(std::string const& ip, size_t const port) {
-    auto const address = ip + ":" + std::to_string(port);
-    return servers.find(address) == servers.end()
-               ? nonstd::nullopt
-               : nonstd::make_optional(servers[address].get());
-  }
-
-  // Alternative to peer service
-  std::vector<model::Peer> get_all_peers() {
-    return peers_;
-  }
-
-  constexpr size_t peers_size() {
-    return peers_.size();
-  }
-
-  void set_peers(std::vector<model::Peer> const& peers) {
-    peers_ = peers;
-  }
-
  private:
   Network() {}
-  std::unordered_map<std::string, std::shared_ptr<Server>> servers;
-
-  // Alternative to peers
+  std::unordered_map<std::string,
+                     std::shared_ptr<consensus::sumeragi::infra::Server>>
+      servers_;
   std::vector<model::Peer> peers_;
 };
 
