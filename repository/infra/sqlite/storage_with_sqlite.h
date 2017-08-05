@@ -17,26 +17,35 @@
 #ifndef REPOSITORY_STORAGE_INFRA_SQLITE_H
 #define REPOSITORY_STORAGE_INFRA_SQLITE_H
 
+#include <SQLiteCpp/SQLiteCpp.h>
 #include "repository/storage.h"
-#include <vector>
-#include <nonstd/optional.hpp>
 
 namespace repository {
-  class StorageWithSqlite : public repository::Storage {
-  public:
-    StorageWithSqlite(std::string const& source_dir);
-    virtual ~StorageWithSqlite() {}
+  class StorageWithSQLite : public repository::Storage {
+   public:
+    StorageWithSQLite(std::string const& source_dir);
+    virtual ~StorageWithSQLite() override {}
+
+    virtual void initialize() override;
 
     // Read
-    virtual std::vector<model::Peer> get_all_peers();
-    virtual model::Peer get_peer(common::types::pubkey_t const& pubkey);
+    virtual boost::expected<std::vector<model::Peer>> get_all_peers() override;
+    virtual boost::expected<model::Peer> get_peer(
+        common::types::pubkey_t const& pubkey) override;
 
-    // Write
-    virtual void save_peer(model::Peer const& peer);
+    // Create
+    virtual bool append_peer(model::Peer const& peer) override;
+
+    // Update
+    virtual bool update_peer(common::types::pubkey_t const& pubkey,
+                             model::Peer const& peer) override;
 
     // Delete
-    virtual void delete_peer();
+    virtual bool delete_peer(common::types::pubkey_t const& pubkey) override;
+
+   private:
+    SQLite::Database db_;
   };
-}
+}  // namespace repository
 
 #endif  // REPOSITORY_STORAGE_INFRA_SQLITE_H

@@ -31,7 +31,7 @@ namespace consensus {
         std::runtime_error("ProxyTails::on_vote() failed to read sumeragi");
       }
       auto sumeragi = *sumeragi_;
-      std::cout << "[ProxyTails] order: " << sumeragi->order() << "\n";
+      std::cout << "[ProxyTails] order: " << sumeragi->trust_order() << "\n";
 
       auto valid = validator::stateful_validate(
           vote.txs);  // TODO: Rename validator -> validation
@@ -108,7 +108,7 @@ namespace consensus {
         auto commit = make_commit(vote);
         send_commit(commit);
       } else {
-        std::cout << "peer: " << sumeragi->order() << " commit_or_retry()\n";
+        std::cout << "peer: " << sumeragi->trust_order() << " commit_or_retry()\n";
         if (elasped_waiting_votes < TimeOut) {
           elasped_waiting_votes += WaitSpan;
           wait_for_signatures(vote);

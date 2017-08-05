@@ -103,14 +103,36 @@ externalproject_add(srombauts_sqlitecpp
   )
 externalproject_get_property(srombauts_sqlitecpp source_dir binary_dir)
 set(sqlitecpp_INCLUDE_DIR ${source_dir}/include)
-set(sqlitecpp_LIBRARY ${binary_dir}/lib/libsqlitecpp.a)
+set(sqlitecpp_LIBRARY ${binary_dir}/libSQLiteCpp.a)
 
 add_library(sqlitecpp STATIC IMPORTED)
 file(MAKE_DIRECTORY ${sqlitecpp_INCLUDE_DIR})
 
 set_target_properties(sqlitecpp PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${sqlitecpp_INCLUDE_DIR}
+  IMPORTED_LINK_INTERFACE_LIBRARIES "${binary_dir}/sqlite3/libsqlite3.a;dl"
   IMPORTED_LOCATION ${sqlitecpp_LIBRARY}
-  #IMPORTED_LINK_INTERFACE_LIBRARIES "pthread"
   )
 add_dependencies(sqlitecpp srombauts_sqlitecpp)
+
+#############################
+#          expected         #
+#############################
+ExternalProject_Add(ptal_expected
+  GIT_REPOSITORY "https://github.com/ptal/expected"
+  CONFIGURE_COMMAND "" # remove configure step
+  BUILD_COMMAND "" # remove build step
+  INSTALL_COMMAND "" # remove install step
+  TEST_COMMAND "" # remove test step
+  UPDATE_COMMAND "" # remove update step
+  )
+ExternalProject_Get_Property(ptal_expected source_dir)
+set(expected_INCLUDE_DIRS ${source_dir}/include)
+file(MAKE_DIRECTORY ${expected_INCLUDE_DIRS})
+
+add_library(expected INTERFACE IMPORTED)
+set_target_properties(expected PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES ${expected_INCLUDE_DIRS}
+  )
+
+add_dependencies(expected ptal_expected)

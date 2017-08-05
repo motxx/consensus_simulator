@@ -1,7 +1,9 @@
-.DS_Store
 .idea/
 cmake-build-debug/
 *~
 #*#
 build/
 third_party/
+Testing/
+.DS_Store
+repository/infra/leveldb/

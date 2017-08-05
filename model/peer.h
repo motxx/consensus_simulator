@@ -18,27 +18,17 @@
 #define MODEL_PEER_H
 
 #include "common/types.h"
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/string.hpp>
 
 namespace model {
   struct Peer {
-    std::string address;
+    std::string ip;
     size_t port;
     common::types::pubkey_t pubkey;
+    size_t trust_order;
 
-    Peer() {}
-    Peer(std::string const& address, common::types::pubkey_t pubkey)
-      : address(address), pubkey(pubkey) {}
-
-   private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int) {
-      ar & boost::serialization::make_nvp("pubkey", pubkey);
-      ar & boost::serialization::make_nvp("address", address);
-      ar & boost::serialization::make_nvp("port", port);
+    bool operator==(Peer const& rhs) const {
+      return ip == rhs.ip && port == rhs.port && pubkey == rhs.pubkey &&
+             trust_order == rhs.trust_order;
     }
   };
 }  // namespace model

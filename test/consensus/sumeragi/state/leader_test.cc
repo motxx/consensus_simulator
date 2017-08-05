@@ -41,7 +41,7 @@ protected:
 
 TEST_F(LeaderTest, on_vote) {
   std::vector<model::Peer> peers(1);
-  peers[0].address = "net1";
+  peers[0].ip = "net1";
   peers[0].port = 12345;
   NETWORK.set_peers(peers);
 

@@ -31,7 +31,7 @@ namespace consensus {
   namespace sumeragi {
 
     Sumeragi::Sumeragi(size_t const order, StateType state_type, std::shared_ptr<Member> state)
-        : order_(order),
+        : trust_order_(order),
           state_(state),
           server_(std::make_shared<infra::Server>(this)) {
       change_state(state_type, state);

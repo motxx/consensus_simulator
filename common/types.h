@@ -19,26 +19,52 @@
 
 #include <array>
 #include <iomanip>
+#include <cstdlib>
+#include <nonstd/optional.hpp>
 
-namespace common { namespace types {
-  template <size_t Bits>
-  struct blob : public std::array<uint8_t, Bits> {
-    constexpr size_t size() const { return this->std::array<uint8_t, Bits>::size(); }
-    uint8_t at(size_t i) const { return this->std::array<uint8_t, Bits>::at(i); }
-    std::string to_hexstring() const {
-      std::stringstream ss;
-      ss << std::hex << std::setfill('0');
-      for (size_t i = 0; i < size(); ++i) {
-        ss << std::setw(2) << static_cast<unsigned>(at(i));
+namespace common {
+  namespace types {
+    template <size_t Bits>
+    struct blob : public std::array<uint8_t, Bits> {
+      uint8_t at(size_t i) const {
+        return this->std::array<uint8_t, Bits>::at(i);
       }
-      return ss.str();
-    }
-  };
+      std::string to_hexstring() const {
+        std::stringstream ss;
+        ss << std::hex << std::setfill('0');
+        for (size_t i = 0; i < size(); ++i) {
+          ss << std::setw(2) << static_cast<unsigned>(at(i));
+        }
+        return ss.str();
+      }
+      constexpr size_t size() const {
+        return this->std::array<uint8_t, Bits>::size();
+      }
+      static nonstd::optional<blob<Bits>> hex_to_blob(std::string const& hex) {
+        blob<Bits> bytes;
+        if (hex.size() != bytes.size() * 2) {
+          return nonstd::nullopt;
+        }
+        const auto hex_size = hex.size();
+        for (size_t i = 0; i < hex_size; i += 2) {
+          const auto byteString = hex.substr(i, 2);
+          const auto byte = static_cast<uint8_t>(std::strtol(byteString.c_str(), NULL, 16));
+          bytes[i / 2] = byte;
+        }
+        return bytes;
+      }
+    };
 
-  using sig_t = common::types::blob<64>;
-  using pubkey_t = common::types::blob<32>;
-  using privkey_t = common::types::blob<64>;
+    struct sig_t : public blob<64> {};
+    struct pubkey_t : public blob<32> {
+      pubkey_t& operator= (blob<32> const& rhs) {
+        std::copy(rhs.begin(), rhs.end(), this->begin());
+        return *this;
+      }
+    };
+    struct privkey_t : public blob<64> {};
 
-}}
+  }  // namespace types
+}  // namespace common
 
 #endif  // CONSENSUS_SUMERAGI_MODEL_SIGNATURE_H

@@ -25,14 +25,14 @@
 namespace consensus {
   namespace sumeragi {
     void Validator::send_to_proxy_tail(VoteMessage const& vote) {
-      auto peers = NETWORK.get_all_peers();  // TODO: Fix get_peer_from_order()
+      auto peers = NETWORK.get_all_peers();  // TODO: Fix get_peer_from_trust_order()
       if (not sumeragi_.has_value()) {
         std::runtime_error(
             "Validator::send_to_proxy_tail() failed to read sumeragi");
       }
       auto sumeragi = *sumeragi_;
       if (auto px = sumeragi->next_proxy()) {
-        std::cout << "send_to_proxy_tail() : " << sumeragi->order() << " -> "
+        std::cout << "send_to_proxy_tail() : " << sumeragi->trust_order() << " -> "
                   << *px << "\n";
         client_->send_vote(peers[*px], vote);
       } else {

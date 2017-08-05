@@ -15,30 +15,101 @@
  */
 
 #include "storage_with_sqlite.h"
-#include <SQLiteCpp/SQLiteCpp.h>
+#include <iostream>
+#include "common/types.h"
 
 namespace repository {
-  StorageWithSqlite::StorageWithSqlite(std::string const &source_dir)
-    : Storage(source_dir)
-  {
+  StorageWithSQLite::StorageWithSQLite(std::string const& source_dir)
+      : db_(source_dir, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
+    std::cout << "SQLite database file '" << db_.getFilename().c_str()
+              << "' opened successfully\n";
   }
 
-  // Read
-  std::vector<model::Peer> get_all_peers() {
-    return std::vector<model::Peer>();
+  void StorageWithSQLite::initialize() {
+    if (db_.exec("DROP TABLE IF EXISTS peer") != SQLite::OK) {
+      std::runtime_error("Cannot DROP");
+    }
+    if (db_.exec("CREATE TABLE peer (pubkey TEXT PRIMARY KEY, ip TEXT, port "
+                 "INTEGER, "
+                 "trust_order INTEGER)") != SQLite::OK) {
+      std::runtime_error("Cannot CREATE TABLE");
+    }
   }
 
-  model::Peer get_peer(common::types::pubkey_t const& pubkey) {
-    return model::Peer();
+  boost::expected<std::vector<model::Peer>> StorageWithSQLite::get_all_peers() {
+    SQLite::Statement query(db_, "SELECT * FROM peer");
+
+    std::vector<model::Peer> ret;
+    while (query.executeStep()) {
+      const std::string pk = query.getColumn("pubkey");
+      const auto pk_blob = common::types::pubkey_t::hex_to_blob(pk);
+      if (not pk_blob.has_value()) {
+        return boost::make_unexpected(read_errc::value_is_broken);
+      }
+      const std::string ip = query.getColumn("ip");
+      const int port = query.getColumn("port");
+      const int trust_order = query.getColumn("trust_order");
+
+      model::Peer peer;
+      peer.pubkey = *pk_blob;
+      peer.ip = ip;
+      peer.port = static_cast<size_t>(port);
+      peer.trust_order = static_cast<size_t>(trust_order);
+      ret.push_back(peer);
+    }
+    return ret;
   }
 
-  // Write
-  void save_peer(model::Peer const& peer) {
+  boost::expected<model::Peer> StorageWithSQLite::get_peer(
+      common::types::pubkey_t const& pubkey) {
+    SQLite::Statement query(db_, "SELECT * FROM peer WHERE pubkey = ?");
+    query.bind(1, pubkey.to_hexstring());
 
+    if (query.executeStep()) {
+      const std::string ip = query.getColumn("ip");
+      const int port = query.getColumn("port");
+      const int trust_order = query.getColumn("trust_order");
+
+      model::Peer ret;
+      ret.pubkey = pubkey;  //*pk_blob;
+      ret.ip = ip;
+      ret.port = static_cast<size_t>(port);
+      ret.trust_order = static_cast<size_t>(trust_order);
+      return ret;
+    } else {
+      return boost::make_unexpected(read_errc::not_found);
+    }
+  }
+
+  // Create
+  bool StorageWithSQLite::append_peer(model::Peer const& peer) {
+    SQLite::Statement query(
+        db_,
+        "INSERT INTO peer (pubkey, ip, port, trust_order) VALUES (?, ?, ?, ?)");
+    query.bind(1, peer.pubkey.to_hexstring());
+    query.bind(2, peer.ip);
+    query.bind(3, static_cast<int>(peer.port));
+    query.bind(4, static_cast<int>(peer.trust_order));
+    return query.exec() == 1;  // success is *NOT* SQLite::OK (= 0)
+  }
+
+  // Update
+  bool StorageWithSQLite::update_peer(common::types::pubkey_t const& pubkey,
+                                      model::Peer const& peer) {
+    SQLite::Statement query(
+        db_, "UPDATE peer SET ip=?, port=?, trust_order=? WHERE pubkey=?");
+    query.bind(1, peer.ip);
+    query.bind(2, static_cast<int>(peer.port));
+    query.bind(3, static_cast<int>(peer.trust_order));
+    query.bind(4, peer.pubkey.to_hexstring());
+    return query.exec() == 1;  // success is *NOT* SQLite::OK (= 0)
   }
 
   // Delete
-  void delete_peer() {
-
+  bool StorageWithSQLite::delete_peer(common::types::pubkey_t const& pubkey) {
+    SQLite::Statement query(db_, "DELETE FROM peer WHERE pubkey=?");
+    query.bind(1, pubkey.to_hexstring());
+    return query.exec() == 1;
   }
-}
+
+}  // namespace repository

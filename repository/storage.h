@@ -17,31 +17,53 @@
 #ifndef REPOSITORY_STORAGE_H
 #define REPOSITORY_STORAGE_H
 
-//#include <leveldb/db.h>
-#include <vector>
+#include <boost/expected/expected.hpp>
 #include <memory>
 #include <nonstd/optional.hpp>
+#include <vector>
 #include "common/types.h"
 #include "model/peer.h"
 
 namespace repository {
+
+  enum class read_errc {
+    value_is_broken,
+    not_found,
+  };
+
+  enum class write_errc { failed_to_write };
+
   class Storage {
    public:
-    Storage(std::string const& source_dir);
     virtual ~Storage() {}
 
-    // Read
-    virtual std::vector<model::Peer> get_all_peers();
-    virtual model::Peer get_peer(common::types::pubkey_t const& pubkey);
+    // Initialize
+    virtual void initialize() { std::runtime_error("undefined"); }
 
-    // Write
-    virtual void save_peer(model::Peer const& peer);
+    // Read
+    virtual boost::expected<std::vector<model::Peer>> get_all_peers() {
+      std::runtime_error("undefined");
+    }
+    virtual boost::expected<model::Peer> get_peer(
+        common::types::pubkey_t const& pubkey) {
+      std::runtime_error("undefined");
+    }
+
+    // Create
+    virtual bool append_peer(model::Peer const& peer) {
+      std::runtime_error("undefined");
+    }
+
+    // Update
+    virtual bool update_peer(common::types::pubkey_t const& pubkey,
+                             model::Peer const& peer) {
+      std::runtime_error("undefined");
+    }
 
     // Delete
-    virtual void delete_peer();
-
-  private:
-    std::string source_dir;
+    virtual bool delete_peer(common::types::pubkey_t const& pubkey) {
+      std::runtime_error("undefined");
+    }
   };
 }  // namespace repository
 

@@ -47,7 +47,7 @@ public:
 
 TEST_F(PeerServiceTest, self) {
   model::Peer self;
-  self.address = "net1";
+  self.ip = "net1";
   self.port = 12345;
   PeerService peer_service(self, storage_mock);
 

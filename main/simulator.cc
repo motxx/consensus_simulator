@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include <gflags/gflags.h>
 #include <iostream>
 #include <thread>
@@ -78,7 +79,7 @@ void send_proposal(std::vector<Context> const& ctx) {
 
 model::Peer create_peer(size_t i) {
   model::Peer ret;
-  ret.address = "net" + std::to_string(i);
+  ret.ip = "net" + std::to_string(i);
   ret.port = 12345;
   auto pk = std::to_string(i);
   for (size_t k = 0; i < pk.size(); ++i) {
@@ -114,7 +115,7 @@ void simulate_normal(size_t const PeerCount) {
           i, StateType::ProxyTail, std::make_shared<ProxyTail>(context.conn));
     }
 
-    context.sumeragi->run_server(self.address, self.port);
+    context.sumeragi->run_server(self.ip, self.port);
     contexts.push_back(context);
 
     peers.push_back(self);
@@ -162,7 +163,7 @@ void simulate_proxy_death(size_t const PeerCount) {
       context.sumeragi = MAKE_SUMERAGI(i, ProxyTail,);
     }
 
-    context.sumeragi->run_server(self.address, self.port);
+    context.sumeragi->run_server(self.ip, self.port);
     contexts.push_back(context);
 
     // TODO: Replace with peer service?
@@ -208,7 +209,7 @@ void simulate_validator_death(size_t const PeerCount) {
       context.sumeragi = MAKE_SUMERAGI(i, ProxyTail,);
     }
 
-    context.sumeragi->run_server(self.address, self.port);
+    context.sumeragi->run_server(self.ip, self.port);
     contexts.push_back(context);
 
     // TODO: Replace with peer service?
@@ -256,7 +257,7 @@ void simulate_validator_max_faulty(size_t const PeerCount) {
       context.sumeragi = MAKE_SUMERAGI(i, ProxyTail,);
     }
 
-    context.sumeragi->run_server(self.address, self.port);
+    context.sumeragi->run_server(self.ip, self.port);
     contexts.push_back(context);
 
     // TODO: Replace with peer service?
@@ -308,7 +309,7 @@ void print_peer_status(consensus::sumeragi::Sumeragi* s) {
     }
   }();
 
-  std::cout << "ID: " << s->order() << " ";
+  std::cout << "ID: " << s->trust_order() << " ";
   std::cout << "[" << consensus::sumeragi::state_string(s->state_type()) << "] "
             << (instance->behaviour() ==
                         consensus::sumeragi::Member::HasError::Normal

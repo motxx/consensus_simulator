@@ -53,7 +53,7 @@ namespace consensus {
       nonstd::optional<Member*> member();
       void change_state(StateType state_type, std::shared_ptr<Member> state);
 
-      size_t order() const { return order_; }
+      size_t trust_order() const { return trust_order_; }
       StateType state_type() const { return state_type_; }
 
       size_t max_faulty() const { return NETWORK.peers_size() / 3; }
@@ -76,7 +76,7 @@ namespace consensus {
       nonstd::optional<size_t> next_proxy() {
         if (next_proxy_tail_ == 0) {
           const int init_index = static_cast<int>(required_num_sigs()) - 1;
-          next_proxy_tail_ = init_index < order_ ? order_ : static_cast<size_t>(init_index);
+          next_proxy_tail_ = init_index < trust_order_ ? trust_order_ : static_cast<size_t>(init_index);
           return nonstd::make_optional(next_proxy_tail_);
         }
         return ++next_proxy_tail_ < NETWORK.peers_size()
@@ -86,7 +86,7 @@ namespace consensus {
 
      private:
       StateType state_type_;
-      size_t order_ = 0;
+      size_t trust_order_ = 0;
       size_t next_proxy_tail_ = 0;  // 0(= 2f), 2f+1, ...
       std::shared_ptr<Member> state_;
       std::shared_ptr<infra::Client> client_;

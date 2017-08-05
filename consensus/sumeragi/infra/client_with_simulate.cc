@@ -25,13 +25,13 @@ namespace consensus {
   namespace sumeragi {
     namespace infra {
       bool Client::send_vote(model::Peer const& peer, VoteMessage const& vote) {
-        auto to_peer = NETWORK.find(peer.address, peer.port);
+        auto to_peer = NETWORK.find(peer.ip, peer.port);
         if (!to_peer.has_value()) { return false; }
         std::thread([to_peer, vote]{ (*to_peer)->on_vote(vote); }).detach();
         return true;
       }
       bool Client::send_commit(model::Peer const& peer, CommitMessage const& commit) {
-        auto to_peer = NETWORK.find(peer.address, peer.port);
+        auto to_peer = NETWORK.find(peer.ip, peer.port);
         if (!to_peer.has_value()) { return false; }
         std::thread([to_peer, commit]{ (*to_peer)->on_commit(commit); }).detach();
         return true;
