@@ -30,6 +30,8 @@ namespace model {
       return ip == rhs.ip && port == rhs.port && pubkey == rhs.pubkey &&
              trust_order == rhs.trust_order;
     }
+
+    bool operator<(Peer const& rhs) const { return pubkey < rhs.pubkey; }
   };
 }  // namespace model
 
