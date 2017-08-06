@@ -19,7 +19,6 @@
 
 #include <boost/expected/expected.hpp>
 #include <memory>
-#include <nonstd/optional.hpp>
 #include <vector>
 #include "common/types.h"
 #include "model/peer.h"
@@ -37,35 +36,35 @@ namespace repository {
    public:
     virtual ~Storage() {}
 
-    // Initialize
-    virtual void initialize() { std::runtime_error("undefined"); }
+    // Init DB
+    virtual void init_db() { std::runtime_error("unimplemented"); }
 
     // Read
     virtual boost::expected<std::vector<model::Peer>> get_all_peers() {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
     virtual boost::expected<model::Peer> get_peer_at(size_t const trust_order) {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
     virtual boost::expected<model::Peer> get_peer(
         common::types::pubkey_t const& pubkey) {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
 
     // Create
     virtual bool append_peer(model::Peer const& peer) {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
 
     // Update
     virtual bool update_peer(common::types::pubkey_t const& pubkey,
                              model::Peer const& peer) {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
 
     // Delete
     virtual bool delete_peer(common::types::pubkey_t const& pubkey) {
-      std::runtime_error("undefined");
+      std::runtime_error("unimplemented");
     }
   };
 }  // namespace repository

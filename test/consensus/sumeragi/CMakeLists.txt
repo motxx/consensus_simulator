@@ -1,2 +1,2 @@
 add_subdirectory(state)
-#add_subdirectory(peer_service)
+add_subdirectory(peer_service)

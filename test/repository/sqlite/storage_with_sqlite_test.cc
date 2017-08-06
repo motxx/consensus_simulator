@@ -24,7 +24,7 @@ protected:
   void SetUp() override {
     mkdir("/tmp/simulator", 0777);
     storage = std::make_unique<StorageWithSQLite>("/tmp/simulator/storage.db3");
-    storage->initialize();
+    storage->init_db();
   }
 
   void TearDown() override {

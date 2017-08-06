@@ -26,7 +26,7 @@ namespace repository {
     StorageWithSQLite(std::string const& source_dir);
     virtual ~StorageWithSQLite() override {}
 
-    virtual void initialize() override;
+    virtual void init_db() override;
 
     // Read
     virtual boost::expected<std::vector<model::Peer>> get_all_peers() override;

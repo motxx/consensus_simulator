@@ -25,7 +25,7 @@ namespace repository {
               << "' opened successfully\n";
   }
 
-  void StorageWithSQLite::initialize() {
+  void StorageWithSQLite::init_db() {
     if (db_.exec("DROP TABLE IF EXISTS peer") != SQLite::OK) {
       std::runtime_error("Cannot DROP");
     }
