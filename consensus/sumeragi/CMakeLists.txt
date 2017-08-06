@@ -1,6 +1,6 @@
 add_subdirectory(infra)
 add_subdirectory(state)
-#add_subdirectory(peer_service)
+add_subdirectory(peer_service)
 
 # sumeragi
 add_library(sumeragi sumeragi.cc)

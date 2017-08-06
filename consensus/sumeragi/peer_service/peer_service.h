@@ -17,6 +17,7 @@
 #ifndef CONSENSUS_SUMERAGI_PEER_SERVICE_H
 #define CONSENSUS_SUMERAGI_PEER_SERVICE_H
 
+#include <memory>
 #include <algorithm>
 #include <nonstd/optional.hpp>
 #include <vector>
@@ -25,42 +26,30 @@
 
 namespace consensus {
   namespace sumeragi {
+
+    /**
+     * PeerService
+     * Peerの順序に関する情報をSumeragiに対して隠蔽する
+     */
     class PeerService {
      public:
       PeerService(model::Peer const& self,
-                  std::shared_ptr<repository::Storage> storage)
-          : self_(self), storage_(storage) {}
+                  std::shared_ptr<repository::Storage> storage);
 
       model::Peer self() const { return self_; }
+      virtual bool is_leader(model::Peer const& peer);
+      virtual std::vector<model::Peer> initial_validators() const;
+      virtual nonstd::optional<model::Peer> proxy_tail(size_t offset) const;
+      virtual void permutate_peers();
 
-      model::Peer proxy_tail() const {
-        auto size = storage_->get_size_of_peers();
-        auto f = size / 3;
-        return storage_->get_peer_from_index(size - f - 1).value();
-      }
-
-      nonstd::optional<model::Peer> next_peer() const {
-        return storage_->get_peer_from_index(self_.index + 1);
-      }
-
-      std::vector<model::Peer> validators() {
-        std::vector<model::Peer> peers;
-        storage_->get_peer_from_index();
-        return peers;
-      }
-
-      void permutate_validators() const {
-        /*
-        auto perm = storage_->get_perm();
-        std::next_permutation(perm.begin(), perm.end());
-        storage_->update_perm(perm);
-        */
-      }
+      virtual size_t max_faulty() const;
+      virtual size_t num_required_sigs() const;
 
      private:
       model::Peer self_;
-      std::vector<Peer> peers_;
+      std::vector<model::Peer> peers_;
       std::shared_ptr<repository::Storage> storage_;
+      // TODO: Storageの更新はTransactionによってのみ行われるため、Storageの読み込み以外の機能を制限する
     };
   }  // namespace sumeragi
 }  // namespace consensus
