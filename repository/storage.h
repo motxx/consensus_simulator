@@ -44,6 +44,9 @@ namespace repository {
     virtual boost::expected<std::vector<model::Peer>> get_all_peers() {
       std::runtime_error("undefined");
     }
+    virtual boost::expected<model::Peer> get_peer_at(size_t const trust_order) {
+      std::runtime_error("undefined");
+    }
     virtual boost::expected<model::Peer> get_peer(
         common::types::pubkey_t const& pubkey) {
       std::runtime_error("undefined");

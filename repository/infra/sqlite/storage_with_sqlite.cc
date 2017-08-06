@@ -40,45 +40,26 @@ namespace repository {
     SQLite::Statement query(db_, "SELECT * FROM peer");
 
     std::vector<model::Peer> ret;
-    while (query.executeStep()) {
-      const std::string pk = query.getColumn("pubkey");
-      const auto pk_blob = common::types::pubkey_t::hex_to_blob(pk);
-      if (not pk_blob.has_value()) {
-        return boost::make_unexpected(read_errc::value_is_broken);
-      }
-      const std::string ip = query.getColumn("ip");
-      const int port = query.getColumn("port");
-      const int trust_order = query.getColumn("trust_order");
-
-      model::Peer peer;
-      peer.pubkey = *pk_blob;
-      peer.ip = ip;
-      peer.port = static_cast<size_t>(port);
-      peer.trust_order = static_cast<size_t>(trust_order);
-      ret.push_back(peer);
+    while (auto peer = execute_get_peer(query)) {
+      ret.push_back(peer.value());
+    }
+    if (ret.empty()) {
+      return boost::make_unexpected(read_errc::not_found);
     }
     return ret;
+  }
+
+  boost::expected<model::Peer> StorageWithSQLite::get_peer_at(size_t const trust_order) {
+    SQLite::Statement query(db_, "SELECT * FROM peer WHERE trust_order = ?");
+    query.bind(1, static_cast<int>(trust_order));
+    return execute_get_peer(query);
   }
 
   boost::expected<model::Peer> StorageWithSQLite::get_peer(
       common::types::pubkey_t const& pubkey) {
     SQLite::Statement query(db_, "SELECT * FROM peer WHERE pubkey = ?");
     query.bind(1, pubkey.to_hexstring());
-
-    if (query.executeStep()) {
-      const std::string ip = query.getColumn("ip");
-      const int port = query.getColumn("port");
-      const int trust_order = query.getColumn("trust_order");
-
-      model::Peer ret;
-      ret.pubkey = pubkey;  //*pk_blob;
-      ret.ip = ip;
-      ret.port = static_cast<size_t>(port);
-      ret.trust_order = static_cast<size_t>(trust_order);
-      return ret;
-    } else {
-      return boost::make_unexpected(read_errc::not_found);
-    }
+    return execute_get_peer(query);
   }
 
   // Create
@@ -110,6 +91,29 @@ namespace repository {
     SQLite::Statement query(db_, "DELETE FROM peer WHERE pubkey=?");
     query.bind(1, pubkey.to_hexstring());
     return query.exec() == 1;
+  }
+
+  // ----------------------- Private -----------------------
+  boost::expected<model::Peer> StorageWithSQLite::execute_get_peer(SQLite::Statement &query) {
+    if (not query.executeStep()) {
+      return boost::make_unexpected(read_errc::not_found);
+    }
+
+    const std::string pk = query.getColumn("pubkey");
+    const auto pk_blob = common::types::pubkey_t::hex_to_blob(pk);
+    if (not pk_blob.has_value()) {
+      return boost::make_unexpected(read_errc::value_is_broken);
+    }
+    const std::string ip = query.getColumn("ip");
+    const int port = query.getColumn("port");
+    const int trust_order = query.getColumn("trust_order");
+
+    model::Peer peer;
+    peer.pubkey = *pk_blob;
+    peer.ip = ip;
+    peer.port = static_cast<size_t>(port);
+    peer.trust_order = static_cast<size_t>(trust_order);
+    return peer;
   }
 
 }  // namespace repository

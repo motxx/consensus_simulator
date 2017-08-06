@@ -30,6 +30,7 @@ namespace repository {
 
     // Read
     virtual boost::expected<std::vector<model::Peer>> get_all_peers() override;
+    virtual boost::expected<model::Peer> get_peer_at(size_t const trust_order) override;
     virtual boost::expected<model::Peer> get_peer(
         common::types::pubkey_t const& pubkey) override;
 
@@ -44,6 +45,8 @@ namespace repository {
     virtual bool delete_peer(common::types::pubkey_t const& pubkey) override;
 
    private:
+    boost::expected<model::Peer> execute_get_peer(SQLite::Statement &query);
+
     SQLite::Database db_;
   };
 }  // namespace repository
